@@ -11,10 +11,12 @@ const sendTokenResponse = (user, statusCode, res) => {
     expiresIn: process.env.JWT_EXPIRES_IN || '7d',
   });
 
+  const isProd = process.env.NODE_ENV === 'production';
+
   const cookieOptions = {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict',
+    secure: isProd,
+    sameSite: isProd ? 'none' : 'lax',
     maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
   };
 
@@ -130,10 +132,13 @@ export const login = async (req, res) => {
  * @access  Public
  */
 export const logout = (_req, res) => {
+  const isProd = process.env.NODE_ENV === 'production';
   res
     .status(200)
     .cookie('token', '', {
       httpOnly: true,
+      secure: isProd,
+      sameSite: isProd ? 'none' : 'lax',
       expires: new Date(0),
     })
     .json({ success: true, message: 'Logged out successfully' });

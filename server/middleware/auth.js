@@ -5,7 +5,12 @@ import jwt from 'jsonwebtoken';
  * Reads JWT from httpOnly cookie, verifies it, and attaches user ID to req.user.
  */
 const protect = (req, res, next) => {
-  const token = req.cookies?.token;
+  let token = req.cookies?.token;
+
+  // Fallback to Bearer token header if cookie is missing
+  if (!token && req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+    token = req.headers.authorization.split(' ')[1];
+  }
 
   if (!token) {
     return res.status(401).json({ message: 'Not authorized — no token provided' });

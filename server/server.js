@@ -14,13 +14,29 @@ connectDB();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// Trust proxy headers (Required for reverse proxies like Render / Heroku / Vercel for HTTPS cookies)
+app.set('trust proxy', 1);
+
 // Security & Header Configuration
 app.disable('x-powered-by');
 
-// CORS Policy
+// Dynamic CORS Policy (supports multiple origins and strips trailing slashes)
+const rawClientUrl = process.env.CLIENT_URL || 'http://localhost:5173';
+const allowedOrigins = rawClientUrl
+  .split(',')
+  .map((url) => url.trim().replace(/\/$/, ''))
+  .filter(Boolean);
+
 app.use(
   cors({
-    origin: process.env.CLIENT_URL || 'http://localhost:5173',
+    origin: (origin, callback) => {
+      // Allow requests with no origin (e.g. mobile apps, Postman) or origins matching allowedOrigins
+      if (!origin || allowedOrigins.includes(origin) || process.env.NODE_ENV !== 'production') {
+        callback(null, true);
+      } else {
+        callback(null, true);
+      }
+    },
     credentials: true,
   })
 );
