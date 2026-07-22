@@ -1,0 +1,12 @@
+{
+  "name": "ai-gym-trainer",
+  "private": true,
+  "type": "module",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "cd client && npm install && npm run build",
+    "install:all": "cd client && npm install && cd ../server && npm install",
+    "dev:client": "npm run dev --prefix client",
+    "dev:server": "npm run dev --prefix server"
+  }
+}

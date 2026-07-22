@@ -30,11 +30,15 @@ const allowedOrigins = rawClientUrl
 app.use(
   cors({
     origin: (origin, callback) => {
-      // Allow requests with no origin (e.g. mobile apps, Postman) or origins matching allowedOrigins
-      if (!origin || allowedOrigins.includes(origin) || process.env.NODE_ENV !== 'production') {
-        callback(null, true);
+      // Allow requests with no origin (e.g. mobile apps, Postman)
+      if (!origin) return callback(null, true);
+      
+      const isAllowed = allowedOrigins.includes(origin) || process.env.NODE_ENV !== 'production';
+      if (isAllowed) {
+        callback(null, origin);
       } else {
-        callback(null, true);
+        // Fallback to allow origin for flexible deployments
+        callback(null, origin);
       }
     },
     credentials: true,
@@ -77,7 +81,12 @@ app.use((err, req, res, next) => {
   });
 });
 
-// Start server
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on http://localhost:${PORT}`);
-});
+// Start server (only when not running on Vercel)
+if (!process.env.VERCEL) {
+  connectDB();
+  app.listen(PORT, () => {
+    console.log(`🚀 Server running on http://localhost:${PORT}`);
+  });
+}
+
+export default app;
